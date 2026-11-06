@@ -1,4 +1,15 @@
-# 予測モデルの前処理と時系列の分割。出典：Codex 実験コード work/processing_experiment/run.py の Prep・inner_splits・OUTER などを一字も変えずに写したもの（論文フォルダだけで再現できるようにするため）
+"""予測比較（03_予測比較.py・03b_予測比較_条件.py）で共通に使う、前処理と時系列のデータ分割。
+
+以前の実験コード（work/processing_experiment/run.py。このリポジトリには含めていない）の Prep・inner_splits・OUTER などを、
+処理を一切変えずに写したものである。論文用のフォルダだけで再現できるように、ここに置いている。
+
+主な定数
+  OUTER      評価する5期（期の名前, 開始日, 終了日）。2024年上期〜2026年上期の半年ごと。終了日はその日を含まない
+  MIN_TRAIN  1期の訓練データに必要な最少件数。これに満たない期は評価しない
+  MIN_TEST   1期の評価データに必要な最少件数
+  MIN_INNER_TRAIN, MIN_VAL  訓練期間の中の検証分割で必要な訓練・検証の最少件数
+  CANDS, N_BOOT, SEED, MAX_PCA, KNOWN_BINS  元の実験コードの設定。03・03b は CANDS を自分で定義しており、これらは使わない
+"""
 import numpy as np, pandas as pd
 from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.decomposition import PCA
@@ -11,10 +22,21 @@ N_BOOT, SEED, MAX_PCA = 3000, 20260928, 3
 KNOWN_BINS = [(0, 3, '0-3'), (4, 5, '4-5'), (6, 7, '6-7')]
 
 class Prep:
+    """説明変数の前処理。訓練データだけで欠損の補完値と標準化の係数を決め（fit）、同じ変換を評価データにも当てる（transform）。
+
+    num   数値変数の列名
+    ai    以前の版で生成AIが作った変数の列名。03・03b では常に空であり、生成AIの変数は使わない
+    proc  前処理の方法
+            'standard'    欠損を訓練データの中央値で埋め、欠損の有無を示す0/1列を足したうえで、すべての列を標準化する
+            'robust'      cont に含まれる連続変数は上下1%で切り詰めてから中央値と四分位範囲で尺度をそろえ、残りの列は標準化する
+            'compressed'  ai の変数を主成分分析で最大 MAX_PCA 次元に縮める（ai が空なら 'standard' と同じになる）
+    cont  'robust' のときに頑健な尺度化を当てる連続変数の列名
+    """
     def __init__(self, num, ai, proc, cont):
         self.num, self.ai, self.proc, self.cont = list(num), list(ai), proc, set(cont)
 
     def _frame(self, X):
+        # 欠損の有無を示す列を足し、欠損を訓練データの中央値で埋める
         Z = X[self.num + self.ai].astype(float).copy()
         for c in self.miss:
             Z[c + '__miss'] = X[c].isna().astype(float)
@@ -22,7 +44,7 @@ class Prep:
 
     def fit(self, X):
         base = X[self.num + self.ai].astype(float)
-        self.miss = [c for c in self.num + self.ai if base[c].isna().any()]
+        self.miss = [c for c in self.num + self.ai if base[c].isna().any()]   # 訓練データで欠損がある列だけに欠損の有無の列を作る
         self.med = base.median().fillna(0.0)
         Z = self._frame(X)
         ind = [c + '__miss' for c in self.miss]
@@ -42,7 +64,7 @@ class Prep:
             k = min(MAX_PCA, len(X) - 1, len(self.keep))
             self.pca = PCA(n_components=k, svd_solver='full').fit(A[:, self.keep]) if k >= 1 else None
             self.rob, self.rs = [], None
-        else:  # standard，或无AI块时的 compressed
+        else:  # 'standard'、または生成AIの変数がないときの 'compressed'
             self.std = list(Z.columns)
             self.ss = StandardScaler().fit(Z[self.std])
             self.rob, self.rs, self.pca = [], None, None
@@ -60,11 +82,18 @@ class Prep:
 
 
 def inner_splits(tr, endcol):
+    """訓練データ tr の中に、時間順の検証分割を最大2つ作る（前処理と罰則の強さを選ぶため）。
+
+    tr を J（jump_day）の順に並べ、最後の約2割を検証ブロックとする（件数は max(MIN_VAL, 件数//5)）。その1つ前の同じ大きさのブロックも検証に使う。
+    各検証ブロックの訓練側には、それより前の案件のうち、収益の期間の最終日（endcol の列）が検証ブロックの最初の J より前のもので、
+    検証ブロックと同じ会社でないものだけを入れる。これにより、検証の時点でまだ分からない収益で学習することを防ぐ。
+    戻り値は（訓練, 検証）の組のリストである。
+    """
     t = tr.sort_values(['jump_day', 'code'])
     n = len(t)
     b = max(MIN_VAL, n // 5)
     out = []
-    for k in (2, 1):  # 较早的验证块在前，最近的在后
+    for k in (2, 1):  # 早い検証ブロックを先に、最も新しいブロックを後に作る
         end = n - (k - 1) * b
         start = end - b
         if start <= 0:
