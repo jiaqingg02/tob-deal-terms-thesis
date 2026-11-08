@@ -76,6 +76,7 @@
 | 付録A 表A.1 書類から抜き出す箇所 | `code/01_dataprep/00_cut_document_passages.py`、`document_passage_cutting.py` | `data/processed/document_passages/` | |
 | 3.3節 買付価格の照合 | `code/01_dataprep/07_check_offer_prices.py` | `offer_price_check.csv` | |
 | 図4.1 価格差と収益率の関係（全部買付け・部分買付け） | `code/02_analysis/figure4_1_price_gap_and_return.py` | `figure4_1_price_gap_and_return.png` | |
+| 図4.2 収益率の分布と対数変換後の分布 | `code/02_analysis/figure4_2_return_before_and_after_log.py` | `figure4_2_return_before_and_after_log.png` | 歪度も出力する |
 | 4.1節の式 | `code/02_analysis/equation.py` | （なし） | 回帰と予測が共通に使う |
 | 第3・4章の本文中の数値 | `code/02_analysis/numbers_in_text.py` | `numbers_in_text.txt` | |
 | 第5章 回帰分析（取引条件を1つずつ加える主表、部分買付けの項、10条件の同時モデルとWald検定、指針後の案件） | `code/02_analysis/table5_regressions.py R1` | `table5_regressions_R1.csv` | 表番号は第5章の執筆後に記す |
