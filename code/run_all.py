@@ -24,6 +24,7 @@ PROGRAMS = [
     ("02_analysis", "figure3_1_return_and_price_gap_distribution.py"),
     ("02_analysis", "appendix_a_agreement_with_ai.py"),
     ("02_analysis", "figure4_1_price_gap_and_return.py"),
+    ("02_analysis", "figure4_2_return_before_and_after_log.py"),
     ("02_analysis", "numbers_in_text.py"),
     # results (Chapter 5; all use the one equation in equation.py)
     ("02_analysis", "table5_regressions.py", "R1"),
