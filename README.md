@@ -8,7 +8,7 @@
 
 ## データの入手可能性と出所
 
-データはこのリポジトリに含めていない。株価は第三者のサイトから取得したものであり、再配布できないためである。
+株価と公開書類の原本はこのリポジトリに含めていない。株価は第三者のサイトから取得したものであり、再配布できないためである。公開書類はEDINETから誰でも取得できる。本稿で作成したデータのうち、株価を用いないものは `data/published/` に置いている（下記）。
 
 | データ | 出所 | 置き場所 |
 |---|---|---|
@@ -17,6 +17,16 @@
 | 日次株価・TOPIX ETF | IR BANK | `RAW_DATA/data*/prices/`、`RAW_DATA/data*/index_topix_etf*.csv` |
 | 報道の見出し | 株探（kabutan.jp）、Google ニュースで検索した日本経済新聞の見出し | `RAW_DATA/data*/news*/`、`RAW_DATA/attention/` |
 | 案件の一覧 | TDnet の公開買付けの開示から作成した表 | `data/inputs/` |
+
+`data/published/` に置くデータ（`code/01_dataprep/08_export_published_data.py` が作成する）：
+
+| ファイル | 内容 |
+|---|---|
+| `deal_list.csv` | 書類を読んだ413件の一覧。証券コード、公表日、計算開始日、二つの書類のEDINETの文書番号と提出日時、分析対象の403件に含まれるか |
+| `deal_terms.csv` | 11の取引条件の判定（1・0。買付資金の記載がない案件は欠測） |
+| `deal_term_evidence.csv` | 案件と条件ごとに、該当した規則、根拠の文、文書番号、頁 |
+| `earlier_ai_judgments.csv` | 規則を作成する前に生成AIが行った判定（付録Aの照合にだけ用いる） |
+| `document_check_of_disagreements_with_ai.csv` | 規則と生成AIの判定が一致しなかった箇所について、原文で確かめた値、理由、根拠の文、文書番号、頁 |
 
 `RAW_DATA` は環境変数 `THESIS_RAW_DATA` で指定する（指定しなければ、このリポジトリの1つ上のフォルダ）。
 
@@ -29,7 +39,7 @@
 
 ## プログラムの説明
 
-- `code/config.py`：データの置き場所と、分析で固定する値（書類の提出期限の15時、張り付きの閾値1%、部分買付けを分ける価格差2%、標本の件数など）をすべてここで一度だけ定める。
+- `code/config.py`：データの置き場所と、分析で固定する値（書類の提出期限の15時、張り付きの閾値1%、部分買付けを分ける価格差0%（株価が買付価格を下回るか否か）、標本の件数など）をすべてここで一度だけ定める。
 - `code/01_dataprep/`：公開書類と株価から変数を作り、案件ごとの分析表 `data/processed/analysis_table.csv` にまとめる。分析表の各列の意味は `data/codebook.csv` に記す。
   - `01_compute_price_gap.py`：J（公表後最初の取引日）、買付プレミアム、計算開始日の価格差 S_i
   - `02_compute_return_to_initial_end.py`：当初の買付期間の末日と収益率 R_i
@@ -38,6 +48,7 @@
   - `05_compute_attention_measures.py`：市場の注目度の指標
   - `06_build_analysis_table.py`：分析表を作る
   - `07_check_offer_prices.py`：分析に使った買付価格が原文の買付価格と一致するかを1件ずつ確かめる
+  - `08_export_published_data.py`：本稿で作成したデータのうち株価を用いないものを `data/published/` に書き出す
 - `code/02_analysis/`：論文の表・図を1つずつ作る。ファイル名は「表・図の番号＋内容」である。`sample.py` が分析対象の403件を読み込み、件数が論文と違えば止まる。
 
 ## 再現の手順
