@@ -1,0 +1,6 @@
+# Data are not redistributed (see README.md, "データの入手可能性と出所")
+data/inputs/
+data/processed/
+output/
+__pycache__/
+.DS_Store
