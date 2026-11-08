@@ -10,7 +10,7 @@ from pathlib import Path
 REPOSITORY = Path(__file__).resolve().parents[1]
 
 # Raw data that cannot be redistributed (stock prices, original documents).
-# The folder must contain data/, data_old/, fill_summary/ and program_vars/.
+# The folder must contain data/, data_old/ and program_vars/.
 RAW_DATA = Path(os.environ.get("THESIS_RAW_DATA", REPOSITORY.parent))
 
 INPUTS = REPOSITORY / "data" / "inputs"          # deal lists prepared from TDnet / EDINET
@@ -25,7 +25,6 @@ for folder in (PROCESSED, PUBLISHED, OUTPUT_TABLES, OUTPUT_FIGURES):
 FILING_DEADLINE_TIME = "15:00"          # documents must be filed before 15:00 on the return start date
 ANNOUNCEMENT_CUTOFF_HOUR = 14           # announcement at or after 14:00 -> J is the next trading day
 PINNED_THRESHOLD_PCT = 1.0              # |price gap| <= 1% -> stock price pinned to the offer price
-PARTIAL_OFFER_GAP_THRESHOLD_PCT = 0.0   # partial offers are split at a price gap of 0% (stock price below or above the offer price); 2% etc. in robustness_thresholds.py
 GUIDELINE_DATE = "2023-08-31"           # METI "Guidelines for Corporate Takeovers"
 
 # Deals that remain in the deal list but violate the filing rule of Section 3.2:
@@ -36,7 +35,7 @@ DEALS_EXCLUDED_BY_FILING_RULE = [
 ]
 
 # Expected sample sizes; the analysis programs stop if the data do not match.
-EXPECTED_SAMPLE_SIZE = {"all": 403, "partial": 64, "pinned": 184, "free": 155}
+EXPECTED_SAMPLE_SIZE = {"all": 403, "partial": 64, "pinned": 187}   # pinned: |price gap| <= PINNED_THRESHOLD_PCT, partial offers included
 
 # ---- Names of the 11 deal terms (Section 3.4) ---------------------------------
 # column name -> name used in the paper
