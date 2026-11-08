@@ -20,7 +20,7 @@ PROGRAMS = [
     ("02_analysis", "table3_1_sample_selection.py"),
     ("02_analysis", "table3_2_and_3_3_deals_by_year_and_descriptive_statistics.py"),
     ("02_analysis", "figure3_1_return_and_price_gap_distribution.py"),
-    ("02_analysis", "validation_independent_reading.py"),
+    ("02_analysis", "appendix_a_agreement_with_ai.py"),
     ("02_analysis", "figure4_1_classification_of_deals.py"),
     ("02_analysis", "figure4_2_absolute_price_gap_distribution.py"),
     ("02_analysis", "table4_1_descriptive_statistics_by_group.py"),
