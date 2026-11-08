@@ -11,7 +11,7 @@ offers (|S_i| <= 1%) and free full offers. With the argument --include-boundary-
 4 deals excluded by the filing rule (config.DEALS_EXCLUDED_BY_FILING_RULE) are added back
 (407 deals, robustness check of the sample rule).
 
-  (1) partial offers: mean return for S_i > 2% and S_i <= 2%, t-test against 0
+  (1) partial offers: mean return for S_i > 0% and S_i <= 0% (stock price below or at/above the offer price), t-test against 0
   (2) terms in the registration statement: in free full offers and in all deals,
         y = a + b x term + c x S_i (+ partial offer dummy in all deals) (+ year dummies for R1)
       HC1 standard errors; * p < .10, ** p < .05

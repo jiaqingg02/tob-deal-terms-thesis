@@ -6,7 +6,7 @@ Sample: the 403 deals of the analysis sample.
   (1) Nikkei news after the announcement (yes / no):
       mean absolute residual of y on the price gap and the partial offer dummy, and the effect
       of three deal terms estimated separately in each group (HC1 standard errors)
-  (2) partial offers with a price gap above 2%: mean y for low / high composite attention
+  (2) partial offers with a price gap above 0% (stock price below the offer price): mean y for low / high composite attention
   (3) offer premium (% of the close before the announcement) and normal trading value:
       median (quantile) regression of the premium on log trading value with controls,
       and median premiums by attention group, also with the premium measured against the
