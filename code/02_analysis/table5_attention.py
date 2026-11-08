@@ -4,9 +4,11 @@ Dependent variable: y = 100 x ln(1 + R_i / 100), as in table5_regressions.py (wi
 Sample: the 403 deals of the analysis sample.
 
   (1) Nikkei news after the announcement (yes / no):
-      mean absolute residual of y on the price gap and the partial offer dummy, and the effect
-      of three deal terms estimated separately in each group (HC1 standard errors)
-  (2) partial offers with a price gap above 0% (stock price below the offer price): mean y for low / high composite attention
+      mean absolute residual of y on the price-gap terms of the one equation (equation.py:
+      max(S_i, 0), pinned, P_i, P_i max(S_i, 0)) and year dummies, and the effect of three deal
+      terms estimated separately in each group with the same equation (HC1 standard errors)
+  (2) partial offers with S_i > 0 (the stock price is below the offer price, so tendering is
+      profitable; "deals where tendering is profitable"): mean y for low / high composite attention
   (3) offer premium (% of the close before the announcement) and normal trading value:
       median (quantile) regression of the premium on log trading value with controls,
       and median premiums by attention group, also with the premium measured against the
@@ -27,26 +29,27 @@ import statsmodels.formula.api as smf
 from scipy import stats
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from config import GUIDELINE_DATE, OUTPUT_TABLES, PARTIAL_OFFER_GAP_THRESHOLD_PCT, PROCESSED, RAW_DATA  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from config import GUIDELINE_DATE, OUTPUT_TABLES, PROCESSED, RAW_DATA  # noqa: E402
+from equation import PRICE_GAP_TERMS, add_equation_columns, regress_on_equation, year_dummies  # noqa: E402
 from sample import load_sample  # noqa: E402
 
 warnings.filterwarnings("ignore")
 
 
 def main():
-    s = load_sample()
+    s = add_equation_columns(load_sample())
     s = s.join(pd.read_csv(PROCESSED / "attention_measures.csv", index_col=0)[
         ["nikkei_articles_after", "reported_before_announcement", "composite_attention_score", "log_normal_trading_value"]])
     s["y"] = 100 * np.log1p(s.return_to_initial_end_pct / 100)
     s["nikkei_news_after"] = s.nikkei_articles_after > 0
-    years = pd.get_dummies(s.announcement_year.astype(str), prefix="year", drop_first=True).astype(float)
     rows = []
 
     def add(section, item, **values):
         rows.append({"section": section, "item": item, **values})
         print(section, item, values)
 
-    x = sm.add_constant(s[["price_gap_at_start_pct", "term_partial_tender_offer"]].astype(float).join(years))
+    x = sm.add_constant(s[PRICE_GAP_TERMS].astype(float).join(year_dummies(s)))
     s["absolute_residual"] = (s.y - sm.OLS(s.y, x).fit().predict(x)).abs()
     no, yes = s[~s.nikkei_news_after], s[s.nikkei_news_after]
     add("(1) 公表後の日経報道", "説明できない部分の絶対値の平均（報道なし／あり）",
@@ -55,20 +58,18 @@ def main():
         deals=f"{len(no)}/{len(yes)}")
 
     def effect(sub, term):
-        x = sub[[term, "price_gap_at_start_pct", "term_partial_tender_offer"]].astype(float).join(
-            pd.get_dummies(sub.announcement_year.astype(str), prefix="year", drop_first=True).astype(float))
-        r = sm.OLS(sub.y, sm.add_constant(x)).fit(cov_type="HC1")
-        return round(r.params[term], 2), round(r.pvalues[term], 3), int(x[term].sum())
+        r, data = regress_on_equation(sub, "y", [term])
+        return round(r.params[term], 2), round(r.pvalues[term], 4), int(data[term].sum())
 
     for term, label in [("term_competitive_bidding", "入札・競合あり"), ("term_resolves_parent_subsidiary_listing", "親子上場の解消"),
                         ("term_abolishes_shareholder_benefits", "株主優待の廃止")]:
         add("(1) 公表後の日経報道", f"{label}の効果（係数, p値, 該当件数）（報道なし／あり）",
             without_news=effect(no, term), with_news=effect(yes, term))
 
-    g = PARTIAL_OFFER_GAP_THRESHOLD_PCT
-    high = s[(s.term_partial_tender_offer == 1) & (s.price_gap_at_start_pct > g)]
+    # partial offers where tendering is profitable (応募有利の案件): S_i > 0, the stock price is below the offer price
+    high = s[(s.term_partial_tender_offer == 1) & (s.price_gap_at_start_pct > 0)]
     low_attention = high.composite_attention_score <= s.composite_attention_score.median()
-    add("(2) 部分買付け", f"価格差{g:.0f}%超の収益（注目度 低／高）",
+    add("(2) 部分買付け", "応募有利の案件（価格差が0%超）の収益（注目度 低／高）",
         low=round(high[low_attention].y.mean(), 2), high=round(high[~low_attention].y.mean(), 2),
         p_value=round(stats.ttest_ind(high[low_attention].y, high[~low_attention].y, equal_var=False).pvalue, 3),
         deals=f"{int(low_attention.sum())}/{int((~low_attention).sum())}",

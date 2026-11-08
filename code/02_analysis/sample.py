@@ -1,11 +1,9 @@
-"""Load the analysis sample (403 deals) and classify the deals into three groups (Section 4.1).
+"""Load the analysis sample (403 deals, Section 3.2) and check its size.
 
-  deal_group = "partial" : partial tender offer (term_partial_tender_offer = 1)
-               "pinned"  : full tender offer with |price gap at start| <= 1%
-               "free"    : other full tender offers (the stock price moves freely)
-
-The program stops if the sample sizes differ from those in the paper
-(config.EXPECTED_SAMPLE_SIZE).
+The program stops if the numbers of deals differ from those in the paper
+(config.EXPECTED_SAMPLE_SIZE): all deals, partial offers (term_partial_tender_offer = 1)
+and deals pinned to the offer price (|price gap at start| <= config.PINNED_THRESHOLD_PCT,
+partial offers included).
 """
 import sys
 from pathlib import Path
@@ -15,12 +13,6 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from config import EXPECTED_SAMPLE_SIZE, PINNED_THRESHOLD_PCT, PROCESSED  # noqa: E402
 
-GROUP_LABELS = {
-    "free": "自由に動く全部買付け",
-    "pinned": "張り付いた全部買付け",
-    "partial": "部分買付け",
-}
-
 
 def load_analysis_table() -> pd.DataFrame:
     """All 413 deals whose documents were read (see code/01_dataprep/06_build_analysis_table.py)."""
@@ -29,22 +21,13 @@ def load_analysis_table() -> pd.DataFrame:
                        na_values=[""])
 
 
-def classify(table: pd.DataFrame) -> pd.Series:
-    partial = table["term_partial_tender_offer"] == 1
-    pinned = table["price_gap_at_start_pct"].abs() <= PINNED_THRESHOLD_PCT
-    group = pd.Series("free", index=table.index)
-    group[~partial & pinned] = "pinned"
-    group[partial] = "partial"
-    return group
-
-
 def load_sample() -> pd.DataFrame:
-    """The 403 deals of the analysis sample, with the column deal_group."""
+    """The 403 deals of the analysis sample."""
     table = load_analysis_table()
     sample = table[table["in_analysis_sample"] == 1].copy()
-    sample["deal_group"] = classify(sample)
-    counts = sample["deal_group"].value_counts()
-    assert len(sample) == EXPECTED_SAMPLE_SIZE["all"], len(sample)
-    for g in ("partial", "pinned", "free"):
-        assert counts[g] == EXPECTED_SAMPLE_SIZE[g], (g, counts[g])
+    counts = {"all": len(sample),
+              "partial": int((sample["term_partial_tender_offer"] == 1).sum()),
+              "pinned": int((sample["price_gap_at_start_pct"].abs() <= PINNED_THRESHOLD_PCT).sum())}
+    for name, expected in EXPECTED_SAMPLE_SIZE.items():
+        assert counts[name] == expected, (name, counts[name], expected)
     return sample

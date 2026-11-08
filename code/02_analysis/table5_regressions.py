@@ -1,4 +1,8 @@
-"""Regressions of the return on each deal term (Section 4.2; results in Chapter 5).
+"""Regressions of the return on the deal terms with the one equation of Section 4.1 (results in Chapter 5).
+
+Equation (equation.py):
+  y_i = a + g max(S_i, 0) + p pinned_i + d P_i + t P_i max(S_i, 0) + f X_i (+ year dummies) + e_i
+  OLS, HC1 standard errors; * p < .10, ** p < .05; p-values are rounded to 4 digits.
 
 Dependent variable (argument):
   R1 (default)  100 x ln(1 + R_i / 100), R_i = return from J+1 to the initial offer end date.
@@ -6,19 +10,16 @@ Dependent variable (argument):
                 (Hsieh and Walkling 2005).
   W1            the same period, market-adjusted (TOPIX subtracted), no year dummies (robustness)
 
-Sample: the 403 deals of the analysis sample, split into partial offers, pinned full
-offers (|S_i| <= 1%) and free full offers. With the argument --include-boundary-deals the
+Sample: the 403 deals of the analysis sample. With the argument --include-boundary-deals the
 4 deals excluded by the filing rule (config.DEALS_EXCLUDED_BY_FILING_RULE) are added back
 (407 deals, robustness check of the sample rule).
 
-  (1) partial offers: mean return for S_i > 0% and S_i <= 0% (stock price below or at/above the offer price), t-test against 0
-  (2) terms in the registration statement: in free full offers and in all deals,
-        y = a + b x term + c x S_i (+ partial offer dummy in all deals) (+ year dummies for R1)
-      HC1 standard errors; * p < .10, ** p < .05
-  (3) terms in the opinion statement (shareholder benefits, parent-subsidiary listing):
-      all deals, full offers, free full offers
-  (4) pinned full offers: the same regressions (terms should have no effect if the price is pinned)
-  (5) (1)-(4) for deals announced on or after the METI guidelines (2023-08-31)
+  (1) main table: each of the 10 deal terms X_i added one at a time
+  (2) the partial offer terms P_i and P_i max(S_i, 0) in the equation without deal terms
+  (3) joint model: the 10 deal terms together, in the deals where every term has a value
+      (the financing term has no value for the 64 deals whose documents have no financing table), and the Wald test that all 10 are 0
+  (4) robustness (Appendix C): (1) with the linear price gap S_i added
+  (5) robustness: (1) for deals announced on or after the METI guidelines (2023-08-31)
 
 Output  output/tables/table5_regressions_{R1|W1}[_including_boundary_deals].csv
 """
@@ -29,23 +30,17 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import statsmodels.api as sm
-from scipy import stats
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from config import (DEAL_TERMS, GUIDELINE_DATE, OUTPUT_TABLES,  # noqa: E402
-                    PARTIAL_OFFER_GAP_THRESHOLD_PCT, PINNED_THRESHOLD_PCT)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from config import DEAL_TERMS, GUIDELINE_DATE, OUTPUT_TABLES  # noqa: E402
+from equation import (DEAL_TERMS_EXCEPT_PARTIAL, PARTIAL_OFFER_TERMS, PRICE_GAP_TERMS,  # noqa: E402
+                      add_equation_columns, regress_on_equation)
 from sample import load_analysis_table, load_sample  # noqa: E402
 
 warnings.filterwarnings("ignore")
 
-REGISTRATION_STATEMENT_TERMS = [
-    "term_competitive_bidding", "term_no_price_increase_confirmed_in_negotiation_with_target",
-    "term_investment_fund_involved_in_acquirer", "term_management_buyout_without_fund",
-    "term_no_tender_or_non_tender_agreement_with_shareholders", "term_board_does_not_recommend_tender",
-    "term_pending_regulatory_approval", "term_no_borrowing_or_equity_financing_planned",
-]
-OPINION_STATEMENT_TERMS = ["term_abolishes_shareholder_benefits", "term_resolves_parent_subsidiary_listing"]
+TERM_NAMES = {**DEAL_TERMS, "partial_x_tender_payoff_pct": "部分買付け×max(価格差, 0)"}
 
 
 def load(include_boundary_deals: bool) -> pd.DataFrame:
@@ -55,61 +50,60 @@ def load(include_boundary_deals: bool) -> pd.DataFrame:
     return table[table.return_to_initial_end_pct.notna() & table.price_gap_at_start_pct.notna()].copy()
 
 
+def significance(p):
+    return "**" if p < .05 else "*" if p < .1 else ""
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("target", nargs="?", default="R1", choices=["R1", "W1"])
     parser.add_argument("--include-boundary-deals", action="store_true")
     args = parser.parse_args()
 
-    df = load(args.include_boundary_deals)
+    df = add_equation_columns(load(args.include_boundary_deals))
     column = "return_to_initial_end_pct" if args.target == "R1" else "market_adjusted_return_to_initial_end_pct"
     df["y"] = 100 * np.log1p(df[column] / 100)
-    df = df[df.y.notna() & df.price_gap_at_start_pct.notna()]
-    year_dummies = args.target == "R1"
-
-    def regress(sub, term, controls=()):
-        """Coefficient and p-value of `term`; not estimated if fewer than 2 deals have or lack the term."""
-        sub = sub[sub[term].notna()]
-        x = sub[[term, "price_gap_at_start_pct", *controls]].astype(float)
-        if year_dummies:   # the earliest year in the sample is the base year
-            x = x.join(pd.get_dummies(sub.announcement_year.astype(str), prefix="year", drop_first=True).astype(float))
-        k = int((x[term] != 0).sum())
-        if k < 2 or len(sub) - k < 2:
-            return dict(coefficient=np.nan, p_value=np.nan, deals_with_term=k, deals_in_sample=len(sub))
-        r = sm.OLS(sub.y.astype(float), sm.add_constant(x)).fit(cov_type="HC1")
-        return dict(coefficient=round(r.params[term], 4), p_value=round(r.pvalues[term], 4),
-                    deals_with_term=k, deals_in_sample=len(sub))
-
+    df = df[df.y.notna()]
+    with_years = args.target == "R1"
     rows = []
 
-    def add(section, item, result):
-        p = result["p_value"]
-        rows.append({"section": section, "item": item, **result,
-                     "significance": "**" if p < .05 else "*" if p < .1 else ""})
+    def add(section, term, result, data):
+        if term not in result.params:   # the term is constant in this sample
+            return
+        p = result.pvalues[term]
+        rows.append({"section": section, "item": TERM_NAMES[term],
+                     "coefficient": round(result.params[term], 4), "p_value": round(p, 4),
+                     "significance": significance(p),
+                     "deals_with_term": int((data[term] != 0).sum()), "deals_in_sample": len(data)})
 
-    def all_results(s, prefix):
-        partial = s.term_partial_tender_offer == 1
-        pinned = s.price_gap_at_start_pct.abs() <= PINNED_THRESHOLD_PCT
-        free, pinned_full = s[~partial & ~pinned], s[~partial & pinned]
-        g = PARTIAL_OFFER_GAP_THRESHOLD_PCT
-        high, low = s[partial & (s.price_gap_at_start_pct > g)], s[partial & (s.price_gap_at_start_pct <= g)]
-        for label, sub in [(f"価格差{g:.0f}%超の平均（0と比較）", high), (f"価格差{g:.0f}%以下の平均（0と比較）", low)]:
-            add(f"{prefix}(1) 部分買付け", label,
-                dict(coefficient=round(sub.y.mean(), 4), p_value=round(stats.ttest_1samp(sub.y, 0).pvalue, 4),
-                     deals_with_term=len(sub), deals_in_sample=int(partial.sum())))
-        for t in REGISTRATION_STATEMENT_TERMS:
-            add(f"{prefix}(2) 自由に動く全部買付け", DEAL_TERMS[t], regress(free, t))
-        for t in REGISTRATION_STATEMENT_TERMS[:4]:
-            add(f"{prefix}(2) 全体", DEAL_TERMS[t], regress(s, t, ["term_partial_tender_offer"]))
-        for t in OPINION_STATEMENT_TERMS:
-            add(f"{prefix}(3) 全体", DEAL_TERMS[t], regress(s, t, ["term_partial_tender_offer"]))
-            add(f"{prefix}(3) 全部買付け", DEAL_TERMS[t], regress(s[~partial], t))
-            add(f"{prefix}(3) 自由に動く全部買付け", DEAL_TERMS[t], regress(free, t))
-        for t in REGISTRATION_STATEMENT_TERMS[:4]:
-            add(f"{prefix}(4) 張り付いた全部買付け", DEAL_TERMS[t], regress(pinned_full, t))
+    def one_term_at_a_time(sub, section, price_gap_terms=PRICE_GAP_TERMS):
+        for term in DEAL_TERMS_EXCEPT_PARTIAL:
+            result, data = regress_on_equation(sub, "y", [term], price_gap_terms, with_years)
+            add(section, term, result, data)
 
-    all_results(df, "")
-    all_results(df[df.announcement_date >= GUIDELINE_DATE], "(5) 指針後 ")
+    one_term_at_a_time(df, "(1) 主表：取引条件を1つずつ加える")
+
+    result, data = regress_on_equation(df, "y", [], PRICE_GAP_TERMS, with_years)
+    for term in PARTIAL_OFFER_TERMS:
+        add("(2) 部分買付けの項（取引条件を加えない式）", term, result, data)
+
+    result, data = regress_on_equation(df, "y", DEAL_TERMS_EXCEPT_PARTIAL, PRICE_GAP_TERMS, with_years)
+    for term in DEAL_TERMS_EXCEPT_PARTIAL:
+        add("(3) 同時モデル：10の取引条件を同時に加える", term, result, data)
+    present = [t for t in DEAL_TERMS_EXCEPT_PARTIAL if t in result.params]
+    restriction = np.zeros((len(present), len(result.params)))
+    for i, term in enumerate(present):
+        restriction[i, list(result.params.index).index(term)] = 1
+    wald_p = float(result.wald_test(restriction, scalar=True).pvalue)
+    rows.append({"section": "(3) 同時モデル：10の取引条件を同時に加える",
+                 "item": f"{len(present)}の取引条件の係数がすべて0（Wald検定）",
+                 "p_value": round(wald_p, 4), "significance": significance(wald_p), "deals_in_sample": len(data)})
+
+    df["price_gap_linear_pct"] = df["price_gap_at_start_pct"]
+    one_term_at_a_time(df, "(4) 頑健性（付録C）：直線の価格差 S を加える",
+                       ["price_gap_linear_pct", *PRICE_GAP_TERMS])
+    one_term_at_a_time(df[df.announcement_date >= GUIDELINE_DATE], "(5) 頑健性：指針後の案件")
+
     result = pd.DataFrame(rows)
     name = f"table5_regressions_{args.target}" + ("_including_boundary_deals" if args.include_boundary_deals else "")
     result.to_csv(OUTPUT_TABLES / f"{name}.csv", index=False, encoding="utf-8-sig")
