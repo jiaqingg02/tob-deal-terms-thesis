@@ -11,6 +11,7 @@ Outputs (data/published/)
                                                  the document and the page
   earlier_ai_judgments.csv                       judgments made earlier by a generative AI (used only in Appendix A)
   document_check_of_disagreements_with_ai.csv    the value confirmed in the original documents for each disagreement
+  deals_with_document_passages.csv               the 453 deals whose passages are cut (input of 00_cut_document_passages.py)
 """
 import shutil
 import sys
@@ -34,8 +35,8 @@ def main():
     table[DEAL_LIST_COLUMNS].to_csv(PUBLISHED / "deal_list.csv", index=False, encoding="utf-8-sig")
     for name in ["deal_terms.csv", "deal_term_evidence.csv", "earlier_ai_judgments.csv"]:
         shutil.copyfile(PROCESSED / name, PUBLISHED / name)
-    shutil.copyfile(INPUTS / "document_check_of_disagreements_with_ai.csv",
-                    PUBLISHED / "document_check_of_disagreements_with_ai.csv")
+    for name in ["document_check_of_disagreements_with_ai.csv", "deals_with_document_passages.csv"]:
+        shutil.copyfile(INPUTS / name, PUBLISHED / name)
     for f in sorted(PUBLISHED.glob("*.csv")):
         print(f.name, len(pd.read_csv(f)), "rows")
 

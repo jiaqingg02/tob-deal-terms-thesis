@@ -7,7 +7,7 @@ registration statement and the opinion statement (document_paragraphs.py); the
 acquirer type (fund / MBO) is judged from the full text (document_full_text.py).
 
 Inputs
-  RAW_DATA/fill_summary/   paragraphs cut from the documents
+  data/processed/document_passages/   passages cut from the documents (00_cut_document_passages.py)
   RAW_DATA/program_vars/ai_vars_411.csv   earlier judgments by a generative AI (comparison only)
   original PDFs (see document_full_text.py)
   corrections_after_document_check.csv   values corrected after checking the original documents
