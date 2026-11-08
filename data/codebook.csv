@@ -1,0 +1,45 @@
+variable,説明,単位・値,作成するプログラム
+deal_id,案件の識別子（証券コード_公表日）,文字列,code/01_dataprep/01_compute_price_gap.py
+target_securities_code,対象会社の証券コード,文字列,data/inputs/prepared_*.csv
+announcement_date,公開買付けの公表日,YYYY-MM-DD,data/inputs/prepared_*.csv
+announcement_year,公表年（回帰の年ダミーに使う）,年,code/01_dataprep/06_build_analysis_table.py
+first_trading_day_after_announcement,J＝公表後最初の取引日（14時より前の公表は公表日、14時以降・時刻不明は翌取引日）,YYYY-MM-DD,code/01_dataprep/01_compute_price_gap.py
+return_start_date,収益率の計算開始日＝J+1,YYYY-MM-DD,data/inputs/prepared_*.csv
+registration_statement_document_id,公開買付届出書のEDINET書類番号（2019・2021年は空欄）,文字列,data/inputs/prepared_*.csv
+opinion_statement_document_id,意見表明報告書のEDINET書類番号,文字列,data/inputs/prepared_*.csv
+registration_statement_filed_at,公開買付届出書の提出日時,YYYY-MM-DD HH:MM,data/inputs/prepared_*.csv
+opinion_statement_filed_at,意見表明報告書の提出日時,YYYY-MM-DD HH:MM,data/inputs/prepared_*.csv
+document_availability_at_return_start,二つの書類がJ+1の15時までに提出されたか（ok＝提出済み、それ以外は理由）,文字列,data/inputs/prepared_*.csv
+offer_premium_ratio,買付プレミアム＝調整後の買付価格÷Jの前取引日の終値−1,比率,code/01_dataprep/01_compute_price_gap.py
+price_gap_at_start_ratio,計算開始日の価格差＝調整後の買付価格÷J+1の終値−1,比率,code/01_dataprep/01_compute_price_gap.py
+price_gap_at_start_pct,計算開始日の価格差S_i（price_gap_at_start_ratio×100）,%,code/01_dataprep/06_build_analysis_table.py
+pinned_to_offer_price,計算開始日に株価が買付価格に張り付いている（|S_i|≦1%）なら1,0/1,code/01_dataprep/01_compute_price_gap.py
+return_to_initial_end_pct,収益率R_i＝J+1の終値から当初の買付期間の末日（以前の最後の取引日）の終値までの変化率。市場を引かない,%,code/01_dataprep/02_compute_return_to_initial_end.py
+market_adjusted_return_to_initial_end_pct,同じ期間のTOPIX ETFを引いた超過収益（日次の差の和。頑健性の確認用）,%,code/01_dataprep/02_compute_return_to_initial_end.py
+initial_offer_end_trading_date,当初の買付期間の末日以前の最後の取引日（延長は含めない）,YYYY-MM-DD,code/01_dataprep/02_compute_return_to_initial_end.py
+board_supports_and_recommends_tender,対象会社が賛同し応募を推奨しているなら1,0/1,data/inputs/prepared_*.csv
+board_opposes_or_reserves_opinion,対象会社が反対または意見を留保しているなら1,0/1,data/inputs/prepared_*.csv
+second_or_later_offer_for_same_target,同じ対象会社への180日以内の2件目以降の公開買付けなら1,0/1,data/inputs/prepared_*.csv
+announced_in_multiple_stages,予告の公表と開始の公表など複数回に分けて公表されたなら1,0/1,data/inputs/prepared_*.csv
+has_news_before_announcement,公表前30日に対象会社の株探の見出しがあれば1,0/1,data/inputs/prepared_*.csv
+news_count_before_announcement,公表前30日の株探の見出しの件数,件,data/inputs/prepared_*.csv
+topix_return_before_announcement_ratio,J−21からJ−2までのTOPIX ETFの収益率,比率,data/inputs/prepared_*.csv
+log_market_capitalization,公表前の時価総額（億円）の自然対数,対数,data/inputs/prepared_*.csv
+listed_on_prime_market,東証プライム市場の上場なら1,0/1,data/inputs/prepared_*.csv
+listed_on_growth_market,東証グロース市場の上場なら1,0/1,data/inputs/prepared_*.csv
+news_headline_tone,公表前30日の株探の見出しの語調＝（肯定語−否定語）÷（肯定語＋否定語）,−1〜1,code/01_dataprep/03_compute_sentiment_scores.py
+news_headline_count,語調の計算に使った見出しの件数,件,code/01_dataprep/03_compute_sentiment_scores.py
+opinion_statement_tone,意見表明報告書の「意見の内容、根拠及び理由」の語調,−1〜1,code/01_dataprep/03_compute_sentiment_scores.py
+term_partial_tender_offer,部分買付け（買付予定数に上限がある、または上場の維持を明記）なら1,0/1,code/01_dataprep/04_extract_deal_terms.py
+term_competitive_bidding,入札・競合あり（入札手続きや対抗提案の記載）なら1,0/1,code/01_dataprep/04_extract_deal_terms.py
+term_no_price_increase_in_negotiation,交渉で買付価格が引き上げられていないなら1,0/1,code/01_dataprep/04_extract_deal_terms.py
+term_acquirer_is_investment_fund,買付者がファンドなら1,0/1,code/01_dataprep/04_extract_deal_terms.py
+term_management_buyout,MBO（経営陣による買収）なら1,0/1,code/01_dataprep/04_extract_deal_terms.py
+term_no_tender_agreement_with_major_shareholder,大株主との応募契約がないなら1,0/1,code/01_dataprep/04_extract_deal_terms.py
+term_board_opinion_is_neutral,対象会社の取締役会の意見が中立（応募は株主の判断に委ねる）なら1,0/1,code/01_dataprep/04_extract_deal_terms.py
+term_pending_regulatory_approval,許認可の承認を待っているなら1,0/1,code/01_dataprep/04_extract_deal_terms.py
+term_financed_by_own_funds,買付資金が自己資金なら1（書類に資金の記載がなければ欠損）,0/1,code/01_dataprep/04_extract_deal_terms.py
+term_abolishes_shareholder_benefits,株主優待を廃止するなら1（意見表明報告書から判定）,0/1,code/01_dataprep/04_extract_deal_terms.py
+term_resolves_parent_subsidiary_listing,親子上場を解消するなら1（意見表明報告書から判定）,0/1,code/01_dataprep/04_extract_deal_terms.py
+excluded_by_filing_rule,3.2節の書類提出の規則に反する4件（頑健性の確認でだけ使う）なら1,0/1,code/01_dataprep/06_build_analysis_table.py
+in_analysis_sample,分析対象の403件（書類の規則を満たし、価格差と収益率がそろう）なら1,0/1,code/01_dataprep/06_build_analysis_table.py
