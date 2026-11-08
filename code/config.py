@@ -15,16 +15,17 @@ RAW_DATA = Path(os.environ.get("THESIS_RAW_DATA", REPOSITORY.parent))
 
 INPUTS = REPOSITORY / "data" / "inputs"          # deal lists prepared from TDnet / EDINET
 PROCESSED = REPOSITORY / "data" / "processed"    # files produced by code/01_dataprep
+PUBLISHED = REPOSITORY / "data" / "published"    # data made in this study that are published in the repository
 OUTPUT_TABLES = REPOSITORY / "output" / "tables"
 OUTPUT_FIGURES = REPOSITORY / "output" / "figures"
-for folder in (PROCESSED, OUTPUT_TABLES, OUTPUT_FIGURES):
+for folder in (PROCESSED, PUBLISHED, OUTPUT_TABLES, OUTPUT_FIGURES):
     folder.mkdir(parents=True, exist_ok=True)
 
 # ---- Analysis parameters (Sections 3.2, 3.3 and 4.1) -------------------------
 FILING_DEADLINE_TIME = "15:00"          # documents must be filed before 15:00 on the return start date
 ANNOUNCEMENT_CUTOFF_HOUR = 14           # announcement at or after 14:00 -> J is the next trading day
 PINNED_THRESHOLD_PCT = 1.0              # |price gap| <= 1% -> stock price pinned to the offer price
-PARTIAL_OFFER_GAP_THRESHOLD_PCT = 2.0   # partial offers are split at a price gap of 2%
+PARTIAL_OFFER_GAP_THRESHOLD_PCT = 0.0   # partial offers are split at a price gap of 0% (stock price below or above the offer price); 2% etc. in robustness_thresholds.py
 GUIDELINE_DATE = "2023-08-31"           # METI "Guidelines for Corporate Takeovers"
 
 # Deals that remain in the deal list but violate the filing rule of Section 3.2:

@@ -16,6 +16,7 @@ PROGRAMS = [
     ("01_dataprep", "05_compute_attention_measures.py"),
     ("01_dataprep", "06_build_analysis_table.py"),
     ("01_dataprep", "07_check_offer_prices.py"),
+    ("01_dataprep", "08_export_published_data.py"),
     # tables and figures (Chapters 3 and 4)
     ("02_analysis", "table3_1_sample_selection.py"),
     ("02_analysis", "table3_2_and_3_3_deals_by_year_and_descriptive_statistics.py"),
