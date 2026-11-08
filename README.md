@@ -34,7 +34,7 @@
   - `01_compute_price_gap.py`：J（公表後最初の取引日）、買付プレミアム、計算開始日の価格差 S_i
   - `02_compute_return_to_initial_end.py`：当初の買付期間の末日と収益率 R_i
   - `03_compute_sentiment_scores.py`：報道見出しと意見表明報告書の語調（辞書法）
-  - `04_extract_deal_terms.py`：11項目の取引条件をキーワードと数値の規則で判定する（規則は `deal_term_rules.py`。生成AIは使わない）
+  - `04_extract_deal_terms.py`：11項目の取引条件をキーワードと数値の規則で判定する（規則は `deal_term_rules.py`。生成AIは使わない）。原文と照らして規則の判定が誤っていた箇所は、根拠の文・文書・ページとともに `corrections_after_document_check.csv` に記し、この表に従って修正する
   - `05_compute_attention_measures.py`：市場の注目度の指標
   - `06_build_analysis_table.py`：分析表を作る
   - `07_check_offer_prices.py`：分析に使った買付価格が原文の買付価格と一致するかを1件ずつ確かめる
@@ -56,8 +56,9 @@
 | 表3.2 年別の件数 | `code/02_analysis/table3_2_and_3_3_deals_by_year_and_descriptive_statistics.py` | `table3_2_deals_by_year.csv` | |
 | 表3.3 収益率と価格差の記述統計 | 同上 | `table3_3_descriptive_statistics.csv` | |
 | 図3.1 収益率と価格差の分布 | `code/02_analysis/figure3_1_return_and_price_gap_distribution.py` | `figure3_1_return_and_price_gap_distribution.png` | |
-| 3.5節 独立の読み取りとの一致 | `code/02_analysis/validation_independent_reading.py` | `validation_independent_reading.csv` | |
-| 3.5節 生成AIの判定との一致 | `code/01_dataprep/04_extract_deal_terms.py` | `deal_terms_agreement_with_ai.csv` | |
+| 表3.4 取引条件の定義と件数 | `code/01_dataprep/04_extract_deal_terms.py` | `data/processed/deal_terms.csv` | 定義は `data/codebook.csv` |
+| 図3.2 取引条件の判定の流れ | `code/02_analysis/figure3_2_how_deal_terms_are_judged.py` | `figure3_2_how_deal_terms_are_judged.png` | |
+| 付録A 生成AIの判定との照合 | `code/02_analysis/appendix_a_agreement_with_ai.py` | `appendix_a_agreement_with_ai.csv` | 不一致はすべて原文で確認 |
 | 3.3節 買付価格の照合 | `code/01_dataprep/07_check_offer_prices.py` | `offer_price_check.csv` | |
 | 図4.1 案件の分け方の手順 | `code/02_analysis/figure4_1_classification_of_deals.py` | `figure4_1_classification_of_deals.png` | 件数はデータから計算する |
 | 図4.2 価格差の絶対値の分布 | `code/02_analysis/figure4_2_absolute_price_gap_distribution.py` | `figure4_2_absolute_price_gap_distribution.png` | |
