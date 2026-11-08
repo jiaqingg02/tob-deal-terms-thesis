@@ -1,5 +1,5 @@
 """Extract the 11 deal terms from the disclosure documents with fixed rules (Section 3.4)
-and compare the result with the earlier judgments made by a generative AI (Section 3.5).
+and save the earlier judgments made by a generative AI for comparison (Appendix A).
 
 The rules are in deal_term_rules.py (keywords and numeric conditions written by
 hand; no generative AI is used). The input paragraphs are those cut from the
@@ -10,10 +10,11 @@ Inputs
   RAW_DATA/fill_summary/   paragraphs cut from the documents
   RAW_DATA/program_vars/ai_vars_411.csv   earlier judgments by a generative AI (comparison only)
   original PDFs (see document_full_text.py)
+  corrections_after_document_check.csv   values corrected after checking the original documents
 Outputs
   data/processed/deal_terms.csv                 one row per deal, one 0/1 column per term
   data/processed/deal_term_evidence.csv         evidence sentence, rule, document and page for each judgment
-  output/tables/deal_terms_agreement_with_ai.csv  agreement rate with the earlier AI judgments
+  data/processed/earlier_ai_judgments.csv       earlier AI judgments, renamed to the same terms (comparison only)
 """
 import sys
 from pathlib import Path
@@ -25,31 +26,31 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import deal_term_rules as rules  # noqa: E402
 import document_full_text  # noqa: E402
 import document_paragraphs  # noqa: E402
-from config import DEAL_TERMS, OUTPUT_TABLES, PROCESSED, RAW_DATA  # noqa: E402
+from config import DEAL_TERMS, PROCESSED, RAW_DATA  # noqa: E402
 
 # column names of the earlier AI judgment file -> names used here
 AI_COLUMNS = {"AI_部分买付": "ai_partial_tender_offer",
               "AI_rival_有过竞标或竞争": "ai_competitive_bidding",
-              "A_price_没提价": "ai_no_price_increase_in_negotiation",
-              "AI_shareholder_没有协议": "ai_no_tender_agreement_with_major_shareholder",
+              "A_price_没提价": "ai_no_price_increase_confirmed_in_negotiation_with_target",
+              "AI_shareholder_没有协议": "ai_no_tender_or_non_tender_agreement_with_shareholders",
               "AI_regulatory_需要批准或异议": "ai_pending_regulatory_approval",
-              "AI_funding_自有资金": "ai_financed_by_own_funds",
-              "AI_board_中立": "ai_board_opinion_is_neutral",
-              "buy_fund": "ai_acquirer_is_investment_fund",
-              "buy_mbo": "ai_management_buyout",
+              "AI_funding_自有资金": "ai_no_borrowing_or_equity_financing_planned",
+              "AI_board_中立": "ai_board_does_not_recommend_tender",
+              "buy_fund": "ai_investment_fund_involved_in_acquirer",
+              "buy_mbo": "ai_management_buyout_without_fund",
               "IK_優待廃止": "ai_abolishes_shareholder_benefits",
               "IK_その他類8": "ai_resolves_parent_subsidiary_listing"}
 
 TERMS = [  # (column name, rule)
     ("term_partial_tender_offer", rules.partial),
     ("term_competitive_bidding", rules.rival),
-    ("term_no_price_increase_in_negotiation", rules.no_raise),
-    ("term_acquirer_is_investment_fund", rules.fund),
-    ("term_management_buyout", rules.mbo),
-    ("term_no_tender_agreement_with_major_shareholder", rules.no_holder_agreement),
-    ("term_board_opinion_is_neutral", rules.board_neutral),
+    ("term_no_price_increase_confirmed_in_negotiation_with_target", rules.no_raise),
+    ("term_investment_fund_involved_in_acquirer", rules.fund),
+    ("term_management_buyout_without_fund", rules.mbo),
+    ("term_no_tender_or_non_tender_agreement_with_shareholders", rules.no_holder_agreement),
+    ("term_board_does_not_recommend_tender", rules.board_neutral),
     ("term_pending_regulatory_approval", rules.reg_pending),
-    ("term_financed_by_own_funds", rules.self_funded),
+    ("term_no_borrowing_or_equity_financing_planned", rules.self_funded),
     ("term_abolishes_shareholder_benefits", rules.perk_abolish),
     ("term_resolves_parent_subsidiary_listing", rules.parent_sub),
 ]
@@ -86,23 +87,23 @@ def main():
     for k in deal_ids:
         paragraphs[k]["_full"] = full_text.get(k, [])   # the acquirer-type rules read the full text
     table, evidence = judge(deal_ids, paragraphs, full_text)
+    # Corrections found by checking the original documents (corrections_after_document_check.csv).
+    # Each row gives the deal, the term, the value given by the rules, the corrected value, the reason and
+    # the sentence, document and page that show the correct value. The rule value is checked first so that
+    # a correction is never applied to a value the rules no longer produce.
+    corrections = pd.read_csv(Path(__file__).resolve().parent / "corrections_after_document_check.csv")
+    for r in corrections.itertuples():
+        assert table.at[r.deal_id, r.deal_term_column] == r.rule_value, (r.deal_id, r.deal_term_column)
+        table.at[r.deal_id, r.deal_term_column] = r.corrected_value
+        for e in evidence:
+            if e["deal_id"] == r.deal_id and e["deal_term"] == DEAL_TERMS[r.deal_term_column]:
+                e.update(judgment=r.corrected_value, matched_rule="原文確認による修正：" + r.reason,
+                         evidence_sentence=r.evidence_sentence, document_type="", document_id=r.document_id, page=r.page)
     table.to_csv(PROCESSED / "deal_terms.csv", encoding="utf-8-sig")
     pd.DataFrame(evidence).to_csv(PROCESSED / "deal_term_evidence.csv", index=False, encoding="utf-8-sig")
 
-    agreement = []
-    for name, _ in TERMS:
-        ai_col = "ai_" + name.removeprefix("term_")
-        a = ai[ai_col]
-        p = table.loc[ai.index, name]
-        ok = a.notna() & p.notna()   # deals where the document says nothing are excluded
-        p, q = p[ok].astype(int), a[ok].astype(int)
-        agreement.append({"deal_term": DEAL_TERMS[name], "number_of_deals": int(ok.sum()),
-                          "agreement_rate_pct": round((p == q).mean() * 100, 1),
-                          "deals_judged_1_by_ai": int(q.sum()), "deals_judged_1_by_rules": int(p.sum()),
-                          "deals_judged_1_by_both": int((p & q).sum())})
-    agreement = pd.DataFrame(agreement)
-    agreement.to_csv(OUTPUT_TABLES / "deal_terms_agreement_with_ai.csv", index=False, encoding="utf-8-sig")
-    print(agreement.to_string(index=False))
+    # the earlier AI judgments are saved for the comparison in Appendix A (code/02_analysis/appendix_a_agreement_with_ai.py)
+    ai[list(AI_COLUMNS.values())].to_csv(PROCESSED / "earlier_ai_judgments.csv", encoding="utf-8-sig")
 
 
 if __name__ == "__main__":
