@@ -40,7 +40,7 @@ def main():
     for threshold in [0.5, 1, 2, 3]:
         pinned = s.price_gap_at_start_pct.abs() <= threshold
         for group, sub in [("自由に動く全部買付け", s[~partial & ~pinned]), ("張り付いた全部買付け", s[~partial & pinned])]:
-            for term in ["term_competitive_bidding", "term_acquirer_is_investment_fund", "term_resolves_parent_subsidiary_listing"]:
+            for term in ["term_competitive_bidding", "term_investment_fund_involved_in_acquirer", "term_resolves_parent_subsidiary_listing"]:
                 rows.append({"check": "(1) 張り付きの閾値", "threshold_pct": threshold, "group": group,
                              "item": DEAL_TERMS[term], **regress(sub, term)})
     p = s[partial]

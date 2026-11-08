@@ -40,10 +40,10 @@ from sample import load_analysis_table, load_sample  # noqa: E402
 warnings.filterwarnings("ignore")
 
 REGISTRATION_STATEMENT_TERMS = [
-    "term_competitive_bidding", "term_no_price_increase_in_negotiation",
-    "term_acquirer_is_investment_fund", "term_management_buyout",
-    "term_no_tender_agreement_with_major_shareholder", "term_board_opinion_is_neutral",
-    "term_pending_regulatory_approval", "term_financed_by_own_funds",
+    "term_competitive_bidding", "term_no_price_increase_confirmed_in_negotiation_with_target",
+    "term_investment_fund_involved_in_acquirer", "term_management_buyout_without_fund",
+    "term_no_tender_or_non_tender_agreement_with_shareholders", "term_board_does_not_recommend_tender",
+    "term_pending_regulatory_approval", "term_no_borrowing_or_equity_financing_planned",
 ]
 OPINION_STATEMENT_TERMS = ["term_abolishes_shareholder_benefits", "term_resolves_parent_subsidiary_listing"]
 

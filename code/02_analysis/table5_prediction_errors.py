@@ -46,7 +46,7 @@ MARKET_AND_PRICE_VARIABLES = [
     "has_news_before_announcement", "news_count_before_announcement",
     "topix_return_before_announcement_ratio", "log_market_capitalization",
     "listed_on_prime_market", "listed_on_growth_market",
-    "term_acquirer_is_investment_fund", "term_management_buyout",
+    "term_investment_fund_involved_in_acquirer", "term_management_buyout_without_fund",
     "price_gap_at_start_ratio", "pinned_to_offer_price",
 ]
 CONTINUOUS_VARIABLES = ["offer_premium_ratio", "topix_return_before_announcement_ratio",
@@ -54,9 +54,9 @@ CONTINUOUS_VARIABLES = ["offer_premium_ratio", "topix_return_before_announcement
                         "price_gap_at_start_ratio"]
 SENTIMENT_VARIABLES = ["news_headline_tone", "news_headline_count", "opinion_statement_tone"]
 DEAL_TERM_VARIABLES = [
-    "term_competitive_bidding", "term_no_price_increase_in_negotiation",
-    "term_no_tender_agreement_with_major_shareholder", "term_board_opinion_is_neutral",
-    "term_pending_regulatory_approval", "term_financed_by_own_funds",
+    "term_competitive_bidding", "term_no_price_increase_confirmed_in_negotiation_with_target",
+    "term_no_tender_or_non_tender_agreement_with_shareholders", "term_board_does_not_recommend_tender",
+    "term_pending_regulatory_approval", "term_no_borrowing_or_equity_financing_planned",
     "term_abolishes_shareholder_benefits", "term_resolves_parent_subsidiary_listing",
 ]
 VARIABLE_SETS = {  # name -> (variables, anchor is 0 for partial offers)

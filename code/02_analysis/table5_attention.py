@@ -77,8 +77,8 @@ def main():
     s["premium_pct"] = 100 * s.offer_premium_ratio
     s["after_guideline"] = s.announcement_date >= GUIDELINE_DATE
     for controls, label in [("log_market_capitalization", "時価総額"),
-                            ("log_market_capitalization + term_acquirer_is_investment_fund + term_management_buyout", "時価総額・ファンド・MBO"),
-                            ("log_market_capitalization + term_acquirer_is_investment_fund + term_management_buyout + term_partial_tender_offer",
+                            ("log_market_capitalization + term_investment_fund_involved_in_acquirer + term_management_buyout_without_fund", "時価総額・ファンド・MBO"),
+                            ("log_market_capitalization + term_investment_fund_involved_in_acquirer + term_management_buyout_without_fund + term_partial_tender_offer",
                              "時価総額・ファンド・MBO・部分買付け")]:
         for sub, period in [(s, "全体"), (s[s.after_guideline], "指針後")]:
             r = smf.quantreg("premium_pct ~ log_normal_trading_value + " + controls,
