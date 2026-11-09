@@ -5,7 +5,7 @@ Sample: the 403 deals of the analysis sample.
 
   (1) Nikkei news after the announcement (yes / no):
       mean absolute residual of y on the price-gap terms of the one equation (equation.py:
-      max(S_i, 0), pinned, P_i, P_i max(S_i, 0)) and year dummies, and the effect of three deal
+      max(S_i, 0), P_i, P_i max(S_i, 0)) and year dummies, and the effect of three deal
       terms estimated separately in each group with the same equation (HC1 standard errors)
   (2) partial offers with S_i > 0 (the stock price is below the offer price, so tendering is
       profitable; "deals where tendering is profitable"): mean y for low / high composite attention

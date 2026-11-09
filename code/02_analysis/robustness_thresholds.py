@@ -1,8 +1,8 @@
-"""Robustness to the threshold of "pinned to the offer price" (Chapter 5, robustness).
+"""Robustness (appendix): the equation with a dummy for deals pinned to the offer price.
 
-The main equation of table5_regressions.py (equation.py) is estimated with the pinned
-dummy defined by |S_i| <= T for T in {0.5, 1, 2, 3}% (1% is the main threshold,
-config.PINNED_THRESHOLD_PCT). Each of the 10 deal terms is added one at a time.
+The main equation (equation.py) has no pinned dummy. Here the dummy |S_i| <= T is added for
+T in {0.5, 1, 2, 3}% (PRICE_GAP_TERMS_WITH_PINNED) to show that the results do not depend on
+whether, and where, such a threshold is drawn. Each of the 10 deal terms is added one at a time.
 Dependent variable: y = 100 x ln(1 + R_i / 100) with year dummies; OLS, HC1 standard errors.
 
 Output  output/tables/robustness_thresholds.csv
@@ -17,7 +17,8 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from config import DEAL_TERMS, OUTPUT_TABLES  # noqa: E402
-from equation import DEAL_TERMS_EXCEPT_PARTIAL, add_equation_columns, regress_on_equation  # noqa: E402
+from equation import (DEAL_TERMS_EXCEPT_PARTIAL, PRICE_GAP_TERMS_WITH_PINNED, add_equation_columns,  # noqa: E402
+                      regress_on_equation)
 from sample import load_sample  # noqa: E402
 
 warnings.filterwarnings("ignore")
@@ -32,7 +33,7 @@ def main():
     for threshold in PINNED_THRESHOLDS_PCT:
         d = add_equation_columns(s, pinned_threshold_pct=threshold)
         for term in DEAL_TERMS_EXCEPT_PARTIAL:
-            result, data = regress_on_equation(d, "y", [term])
+            result, data = regress_on_equation(d, "y", [term], PRICE_GAP_TERMS_WITH_PINNED)
             p = result.pvalues[term]
             rows.append({"check": "張り付きの閾値", "pinned_threshold_pct": threshold,
                          "deals_pinned": int(data["pinned"].sum()), "item": DEAL_TERMS[term],
