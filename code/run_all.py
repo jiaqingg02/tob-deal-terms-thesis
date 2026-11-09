@@ -26,14 +26,17 @@ PROGRAMS = [
     ("02_analysis", "figure4_1_price_gap_and_return.py"),
     ("02_analysis", "figure4_2_return_before_and_after_log.py"),
     ("02_analysis", "numbers_in_text.py"),
-    # results (Chapter 5; all use the one equation in equation.py)
+    # results (Chapter 5; regressions use the equation in equation.py, predictions the same variables)
     ("02_analysis", "table5_regressions.py", "R1"),
     ("02_analysis", "table5_regressions.py", "W1"),
     ("02_analysis", "table5_regressions.py", "R1", "--include-boundary-deals"),
     ("02_analysis", "table5_prediction_errors.py", "R1"),
     ("02_analysis", "table5_prediction_errors.py", "W1"),
+    ("02_analysis", "table5_prediction_errors.py", "R1", "--evaluation", "time"),
     ("02_analysis", "table5_attention.py"),
     ("02_analysis", "robustness_thresholds.py"),
+    # Appendix D
+    ("02_analysis", "tableD1_prediction_errors_by_method.py"),
     # Appendix C
     ("02_analysis", "figureC1_absolute_price_gap_distribution.py"),
 ]
