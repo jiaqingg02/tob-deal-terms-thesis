@@ -36,12 +36,12 @@
 - Python 3.12.3。パッケージとその版は `requirements.txt` に記す（pandas 3.0.5、numpy 2.5.2、scipy 1.18.0、statsmodels 0.15.0、scikit-learn 1.9.0、matplotlib 3.11.1、pymupdf 1.28.0）。
 - 届出書のテキスト化には Poppler の `pdftotext`（26.07.0）を使う。
 - 図の日本語にはヒラギノ明朝 ProN（macOS 標準）を使う。
-- 乱数：予測のブートストラップ区間は `numpy.random.default_rng(0)` で固定している。
-- 実行した計算機：Apple M2、メモリ 8GB、macOS 15.7。全体の実行時間は約4分。
+- 乱数：予測のブートストラップ区間は `numpy.random.default_rng(0)`、ランダムフォレストと勾配ブースティングは `random_state=0` で固定している。
+- 実行した計算機：Apple M2、メモリ 8GB、macOS 15.7。全体の実行時間は約40分（大半は付録Dの全方法の比較）。
 
 ## プログラムの説明
 
-- `code/config.py`：データの置き場所と、分析で固定する値（書類の提出期限の15時、張り付きの閾値1%、標本の件数など）をすべてここで一度だけ定める。
+- `code/config.py`：データの置き場所と、分析で固定する値（書類の提出期限の15時、付録で使う張り付きの閾値1%、標本の件数など）をすべてここで一度だけ定める。
 - `code/01_dataprep/`：公開書類と株価から変数を作り、案件ごとの分析表 `data/processed/analysis_table.csv` にまとめる。分析表の各列の意味は `data/codebook.csv` に記す。
   - `00_cut_document_passages.py`：書類をテキストにし（届出書は `pdftotext -layout`、意見表明報告書と適時開示は PyMuPDF）、取引条件ごとに関係する箇所を見出しと語句で抜き出して、社名と証券コードを「■■」に置き換える。抜き出し方は `document_passage_cutting.py` に記す（付録Aの表A.1）
   - `01_compute_price_gap.py`：J（公表後最初の取引日）、買付プレミアム、計算開始日の価格差 S_i
@@ -52,7 +52,7 @@
   - `06_build_analysis_table.py`：分析表を作る
   - `07_check_offer_prices.py`：分析に使った買付価格が原文の買付価格と一致するかを1件ずつ確かめる
   - `08_export_published_data.py`：本稿で作成したデータのうち株価を用いないものを `data/published/` に書き出す
-- `code/02_analysis/`：論文の表・図を1つずつ作る。ファイル名は「表・図の番号＋内容」である。`sample.py` が分析対象の403件を読み込み、全体・部分買付け・張り付いた案件の件数（403・64・187件）が論文と違えば止まる。`equation.py` は、回帰と予測に共通する1本の式（4.1節：max(S_i, 0)、張り付き、部分買付け P_i、P_i×max(S_i, 0)、取引条件、年のダミー変数）の変数を定め、回帰の推定もここで行う。回帰・予測・頑健性・注目度の各プログラムはこの式を使う。
+- `code/02_analysis/`：論文の表・図を1つずつ作る。ファイル名は「表・図の番号＋内容」である。`sample.py` が分析対象の403件を読み込み、全体・部分買付け・張り付いた案件の件数（403・64・187件）が論文と違えば止まる。`equation.py` は回帰式（4.1節：max(S_i, 0)、部分買付け P_i、P_i×max(S_i, 0)、取引条件、年のダミー変数）の変数を定め、回帰の推定もここで行う。張り付きの変数（|S_i|≦1%）は主な式に入れず、付録の頑健性の確認にだけ使う。予測（`table5_prediction_errors.py`）は回帰式の右辺と同じ変数を使い、変数と収益率の関係の形はあらかじめ決めずに学習する。方法は、数値だけのモデルで6つの方法の平均絶対誤差を比べてプログラムが選ぶ（ランダムフォレストが選ばれる）。
 
 ## 再現の手順
 
@@ -77,16 +77,20 @@
 | 3.3節 買付価格の照合 | `code/01_dataprep/07_check_offer_prices.py` | `offer_price_check.csv` | |
 | 図4.1 価格差と収益率の関係（全部買付け・部分買付け） | `code/02_analysis/figure4_1_price_gap_and_return.py` | `figure4_1_price_gap_and_return.png` | |
 | 図4.2 収益率の分布と対数変換後の分布 | `code/02_analysis/figure4_2_return_before_and_after_log.py` | `figure4_2_return_before_and_after_log.png` | 歪度も出力する |
-| 4.1節の式 | `code/02_analysis/equation.py` | （なし） | 回帰と予測が共通に使う |
+| 4.1節の式 | `code/02_analysis/equation.py` | （なし） | 回帰の式。予測も同じ変数を使う |
 | 第3・4章の本文中の数値 | `code/02_analysis/numbers_in_text.py` | `numbers_in_text.txt` | |
 | 第5章 回帰分析（取引条件を1つずつ加える主表、部分買付けの項、10条件の同時モデルとWald検定、指針後の案件） | `code/02_analysis/table5_regressions.py R1` | `table5_regressions_R1.csv` | 表番号は第5章の執筆後に記す |
-| 第5章 予測誤差の比較（二乗平均平方根誤差が主、平均絶対誤差も示す。95%ブートストラップ区間と Diebold-Mariano 検定） | `code/02_analysis/table5_prediction_errors.py R1` | `table5_prediction_errors_R1.csv` | |
+| 第5章 予測の方法の選択（数値だけのモデルで6つの方法を比べる） | `code/02_analysis/table5_prediction_errors.py R1` | `table5_method_selection_R1.csv` | 平均絶対誤差が最小の方法を使う |
+| 第5章 予測誤差の比較（403件を会社ごとに10グループに分けて評価。平均絶対誤差と二乗平均平方根誤差、95%ブートストラップ区間と Diebold-Mariano 検定） | `code/02_analysis/table5_prediction_errors.py R1` | `table5_prediction_errors_R1.csv`、`table5_prediction_errors_R1_by_deal.csv` | |
 | 第5章 市場の注目度 | `code/02_analysis/table5_attention.py` | `table5_attention.csv` | |
 | 頑健性：TOPIX を引いた収益 | `table5_regressions.py W1`、`table5_prediction_errors.py W1` | `table5_regressions_W1.csv`、`table5_prediction_errors_W1.csv` | |
 | 頑健性：書類の規則の境界にある4件を加える | `table5_regressions.py R1 --include-boundary-deals` | `table5_regressions_R1_including_boundary_deals.csv` | |
-| 頑健性：張り付きの閾値を0.5・1・2・3%に変える | `code/02_analysis/robustness_thresholds.py` | `robustness_thresholds.csv` | |
+| 頑健性（付録）：時間の順に予測する（2024年上期〜2026年上期、221件） | `table5_prediction_errors.py R1 --evaluation time` | `table5_method_selection_R1_time.csv`、`table5_prediction_errors_R1_time.csv` | |
+| 頑健性（付録）：張り付きの変数を回帰式に加える | `code/02_analysis/table5_regressions.py R1` | `table5_regressions_R1.csv` の (6) | |
+| 頑健性（付録）：張り付きの変数の閾値を0.5・1・2・3%に変える | `code/02_analysis/robustness_thresholds.py` | `robustness_thresholds.csv` | |
+| 付録D 表D.1 すべての方法・評価の仕方・張り付きの変数の有無での予測誤差 | `code/02_analysis/tableD1_prediction_errors_by_method.py` | `tableD1_prediction_errors_by_method.csv` | |
 | 付録C 直線の価格差 S_i を式に加える | `code/02_analysis/table5_regressions.py R1` | `table5_regressions_R1.csv` の (4) | |
-| 付録C 図C.1 全部買付けの価格差の絶対値の分布 | `code/02_analysis/figureC1_absolute_price_gap_distribution.py` | `figureC1_absolute_price_gap_distribution.png` | 張り付きの閾値1%の位置を示す |
+| 付録C 図C.1 全部買付けの価格差の絶対値の分布 | `code/02_analysis/figureC1_absolute_price_gap_distribution.py` | `figureC1_absolute_price_gap_distribution.png` | 張り付きの変数の閾値1%の位置を示す |
 
 ## 参考文献
 
