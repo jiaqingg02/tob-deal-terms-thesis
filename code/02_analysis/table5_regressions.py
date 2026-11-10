@@ -21,6 +21,7 @@ Sample: the 403 deals of the analysis sample. With the argument --include-bounda
   (4) robustness (Appendix C): (1) with the linear price gap S_i added
   (5) robustness: (1) for deals announced on or after the METI guidelines (2023-08-31)
   (6) robustness (appendix): (1) and (3) with the pinned dummy (|S_i| <= 1%) added
+  (7) the no-agreement term and the parent-subsidiary term added together, and the number of deals with both (Section 5.1.2)
 
 Output  output/tables/table5_regressions_{R1|W1}[_including_boundary_deals].csv
 """
@@ -112,6 +113,15 @@ def main():
     result, data = regress_on_equation(df, "y", [], PRICE_GAP_TERMS_WITH_PINNED, with_years)
     add("(6) 頑健性（付録）：張り付きの変数を加える（1つずつ）", "pinned", result, data)
     joint_model("(6) 頑健性（付録）：張り付きの変数を加える（同時モデル）", PRICE_GAP_TERMS_WITH_PINNED)
+
+    # (7) the two terms that overlap most: no agreement with shareholders and parent-subsidiary listing, added together
+    agreement, parent = "term_no_tender_or_non_tender_agreement_with_shareholders", "term_resolves_parent_subsidiary_listing"
+    result, data = regress_on_equation(df, "y", [agreement, parent], PRICE_GAP_TERMS, with_years)
+    section = "(7) 合意の記載なしと親子上場の解消を同時に加える"
+    add(section, agreement, result, data)
+    add(section, parent, result, data)
+    rows.append({"section": section, "item": "合意の記載なしのうち親子上場の解消に当たる案件",
+                 "deals_with_term": int(((df[agreement] == 1) & (df[parent] == 1)).sum()), "deals_in_sample": len(df)})
 
     result = pd.DataFrame(rows)
     name = f"table5_regressions_{args.target}" + ("_including_boundary_deals" if args.include_boundary_deals else "")
