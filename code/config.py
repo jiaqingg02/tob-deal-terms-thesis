@@ -25,6 +25,7 @@ for folder in (PROCESSED, PUBLISHED, OUTPUT_TABLES, OUTPUT_FIGURES):
 FILING_DEADLINE_TIME = "15:00"          # documents must be filed before 15:00 on the return start date
 ANNOUNCEMENT_CUTOFF_HOUR = 14           # announcement at or after 14:00 -> J is the next trading day
 PINNED_THRESHOLD_PCT = 1.0              # |price gap| <= 1% -> stock price pinned to the offer price
+PREDICTION_CHANGE_HIGHLIGHT_PCT = 3.0    # Figure 5.5: deals whose absolute prediction error changes by >= 3 points are counted
 GUIDELINE_DATE = "2023-08-31"           # METI "Guidelines for Corporate Takeovers"
 
 # Deals that remain in the deal list but violate the filing rule of Section 3.2:
