@@ -79,9 +79,15 @@
 | 図4.2 収益率の分布と対数変換後の分布 | `code/02_analysis/figure4_2_return_before_and_after_log.py` | `figure4_2_return_before_and_after_log.png` | 歪度も出力する |
 | 4.1節の式 | `code/02_analysis/equation.py` | （なし） | 回帰の式。予測も同じ変数を使う |
 | 第3・4章の本文中の数値 | `code/02_analysis/numbers_in_text.py` | `numbers_in_text.txt` | |
-| 第5章 回帰分析（取引条件を1つずつ加える主表、部分買付けの項、10条件の同時モデルとWald検定、指針後の案件） | `code/02_analysis/table5_regressions.py R1` | `table5_regressions_R1.csv` | 表番号は第5章の執筆後に記す |
-| 第5章 予測の方法の選択（数値だけのモデルで6つの方法を比べる） | `code/02_analysis/table5_prediction_errors.py R1` | `table5_method_selection_R1.csv` | 平均絶対誤差が最小の方法を使う |
-| 第5章 予測誤差の比較（403件を会社ごとに10グループに分けて評価。平均絶対誤差と二乗平均平方根誤差、95%ブートストラップ区間と Diebold-Mariano 検定） | `code/02_analysis/table5_prediction_errors.py R1` | `table5_prediction_errors_R1.csv`、`table5_prediction_errors_R1_by_deal.csv` | |
+| 表5.1 取引条件と収益率の関係の推定結果（取引条件を1つずつ加える推定、部分買付けの項、書類から読み取った取引条件を同時に加えた推定と Wald 検定） | `code/02_analysis/table5_regressions.py R1` | `table5_regressions_R1.csv` の (1)〜(3) | 指針後の案件は (5) |
+| 5.1.2節の本文 合意の記載なしと親子上場の解消を同時に加えた推定、両方に当たる案件の件数 | `code/02_analysis/table5_regressions.py R1` | `table5_regressions_R1.csv` の (7) | |
+| 図5.1 取引条件ごとの係数と90%信頼区間 | `code/02_analysis/figure5_1_deal_term_coefficients.py` | `figure5_1_deal_term_coefficients.png` | 表5.1の (1) と同じ推定 |
+| 図5.2 親子上場の解消と合意の記載なしにおける価格差と収益率の関係 | `code/02_analysis/figure5_2_parent_and_no_agreement_returns.py` | `figure5_2_parent_and_no_agreement_returns.png`、`figure5_2_returns_relative_to_price_gap.csv` | 本文の割合（収益率が価格差から1ポイント以内の割合など）は csv に出力する |
+| 図5.3 全部買付けと部分買付けにおける価格差の正の部分と収益率の関係 | `code/02_analysis/figure5_3_partial_offer_price_gap_and_return.py` | `figure5_3_partial_offer_price_gap_and_return.png` | 傾きと切片を画面に出力する |
+| 予測の方法の選択（数値だけのモデルで6つの方法を比べる。表4.1） | `code/02_analysis/table5_prediction_errors.py R1` | `table5_method_selection_R1.csv` | 平均絶対誤差が最小の方法を使う |
+| 表5.2 三つのモデルの予測誤差と改善幅（403件を会社ごとに10グループに分けて評価。平均絶対誤差と二乗平均平方根誤差、95%ブートストラップ区間と、案件ごとの予測誤差の差の t 検定） | `code/02_analysis/table5_prediction_errors.py R1` | `table5_prediction_errors_R1.csv`、`table5_prediction_errors_R1_by_deal.csv` | |
+| 図5.4 実際の収益率と予測した収益率（三つのモデル） | `code/02_analysis/figure5_4_actual_and_predicted_returns.py` | `figure5_4_actual_and_predicted_returns.png` | `table5_prediction_errors.py R1` の後に実行する |
+| 図5.5 基本モデルと取引条件モデルの予測した収益率 | `code/02_analysis/figure5_5_basic_and_deal_terms_predictions.py` | `figure5_5_basic_and_deal_terms_predictions.png`、`figure5_5_deals_whose_prediction_changed.csv` | 本文の全部買付け・部分買付け別の絶対誤差の減少は csv に出力する |
 | 第5章 市場の注目度 | `code/02_analysis/table5_attention.py` | `table5_attention.csv` | |
 | 頑健性：TOPIX を引いた収益 | `table5_regressions.py W1`、`table5_prediction_errors.py W1` | `table5_regressions_W1.csv`、`table5_prediction_errors_W1.csv` | |
 | 頑健性：書類の規則の境界にある4件を加える | `table5_regressions.py R1 --include-boundary-deals` | `table5_regressions_R1_including_boundary_deals.csv` | |
