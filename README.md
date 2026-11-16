@@ -25,7 +25,7 @@
 | `deal_list.csv` | 書類を読んだ413件の一覧。証券コード、公表日、計算開始日、二つの書類のEDINETの文書番号と提出日時、分析対象の403件に含まれるか |
 | `deal_terms.csv` | 11の取引条件の判定（1・0。買付資金の記載がない案件は欠測） |
 | `deal_term_evidence.csv` | 案件と条件ごとに、該当した規則、根拠の文、文書番号、頁 |
-| `earlier_ai_judgments.csv` | 規則を作成する前に生成AIが行った判定（付録Aの照合にだけ用いる） |
+| `earlier_ai_judgments.csv` | 規則を作成する前に生成AIが行った判定（付録Aの照合にだけ用いる）。生成AIに与えた指示文は `prompts/` に置いている |
 | `deals_with_document_passages.csv` | 書類から段落を抜き出す453件と、書類の種類（EDINET の届出書・意見表明報告書、または TDnet の適時開示） |
 | `document_check_of_disagreements_with_ai.csv` | 規則と生成AIの判定が一致しなかった箇所について、原文で確かめた値、理由、根拠の文、文書番号、頁 |
 
