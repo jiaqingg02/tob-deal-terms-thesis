@@ -18,10 +18,14 @@ PROGRAMS = [
     ("01_dataprep", "06_build_analysis_table.py"),
     ("01_dataprep", "07_check_offer_prices.py"),
     ("01_dataprep", "08_export_published_data.py"),
+    # figures (Chapter 1)
+    ("02_analysis", "figure1_1_deals_by_year_and_type.py"),
+    ("02_analysis", "figure1_2_price_gap_diagram.py"),
     # tables and figures (Chapters 3 and 4)
     ("02_analysis", "table3_1_sample_selection.py"),
     ("02_analysis", "table3_2_and_3_3_deals_by_year_and_descriptive_statistics.py"),
     ("02_analysis", "figure3_1_return_and_price_gap_distribution.py"),
+    ("02_analysis", "figure3_2_how_deal_terms_are_judged.py"),
     ("02_analysis", "appendix_a_agreement_with_ai.py"),
     ("02_analysis", "figure4_1_price_gap_and_return.py"),
     ("02_analysis", "figure4_2_return_before_and_after_log.py"),
@@ -36,10 +40,14 @@ PROGRAMS = [
     ("02_analysis", "table5_prediction_errors.py", "R1"),
     ("02_analysis", "figure5_4_actual_and_predicted_returns.py"),
     ("02_analysis", "figure5_5_basic_and_deal_terms_predictions.py"),
+    ("02_analysis", "figure5_6_basic_and_tone_predictions.py"),
     ("02_analysis", "table5_prediction_errors.py", "W1"),
     ("02_analysis", "table5_prediction_errors.py", "R1", "--evaluation", "time"),
     ("02_analysis", "table5_attention.py"),
     ("02_analysis", "robustness_thresholds.py"),
+    # figures (Chapter 6)
+    ("02_analysis", "figure6_1_prediction_errors_of_three_models.py"),
+    ("02_analysis", "figure6_2_future_research.py"),
     # Appendix D
     ("02_analysis", "tableD1_prediction_errors_by_method.py"),
     # Appendix C
