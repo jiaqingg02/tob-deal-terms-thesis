@@ -66,6 +66,8 @@
 
 | 表・図 | プログラム | 出力ファイル | 備考 |
 |---|---|---|---|
+| 図1.1 公表年・取引の種類別の公開買付けの件数 | `code/02_analysis/figure1_1_deals_by_year_and_type.py` | `figure1_1_deals_by_year_and_type.png` | |
+| 図1.2 買付プレミアム、価格差および収益率の関係 | `code/02_analysis/figure1_2_price_gap_diagram.py` | `figure1_2_price_gap_diagram.png` | 模式図（データを使わない） |
 | 表3.1 分析対象の選定 | `code/02_analysis/table3_1_sample_selection.py` | `table3_1_sample_selection.csv` | |
 | 表3.2 年別の件数 | `code/02_analysis/table3_2_and_3_3_deals_by_year_and_descriptive_statistics.py` | `table3_2_deals_by_year.csv` | |
 | 表3.3 収益率と価格差の記述統計 | 同上 | `table3_3_descriptive_statistics.csv` | |
@@ -88,6 +90,9 @@
 | 表5.2 三つのモデルの予測誤差と改善幅（403件を会社ごとに10グループに分けて評価。平均絶対誤差と二乗平均平方根誤差、95%ブートストラップ区間と、案件ごとの予測誤差の差の t 検定） | `code/02_analysis/table5_prediction_errors.py R1` | `table5_prediction_errors_R1.csv`、`table5_prediction_errors_R1_by_deal.csv` | |
 | 図5.4 実際の収益率と予測した収益率（三つのモデル） | `code/02_analysis/figure5_4_actual_and_predicted_returns.py` | `figure5_4_actual_and_predicted_returns.png` | `table5_prediction_errors.py R1` の後に実行する |
 | 図5.5 基本モデルと取引条件モデルの予測した収益率 | `code/02_analysis/figure5_5_basic_and_deal_terms_predictions.py` | `figure5_5_basic_and_deal_terms_predictions.png`、`figure5_5_deals_whose_prediction_changed.csv` | 本文の全部買付け・部分買付け別の絶対誤差の減少は csv に出力する |
+| 図5.6 基本モデルと語調モデルの予測した収益率 | `code/02_analysis/figure5_6_basic_and_tone_predictions.py` | `figure5_6_basic_and_tone_predictions.png`、`figure5_6_tone_prediction_change.csv` | 本文の予測値の変化と絶対誤差が縮んだ案件の数は csv に出力する |
+| 図6.1 三つのモデルの予測誤差 | `code/02_analysis/figure6_1_prediction_errors_of_three_models.py` | `figure6_1_prediction_errors_of_three_models.png` | `table5_prediction_errors.py R1` の後に実行する |
+| 図6.2 本稿の分析と今後の課題 | `code/02_analysis/figure6_2_future_research.py` | `figure6_2_future_research.png` | 模式図（データを使わない） |
 | 第5章 市場の注目度 | `code/02_analysis/table5_attention.py` | `table5_attention.csv` | |
 | 頑健性：TOPIX を引いた収益 | `table5_regressions.py W1`、`table5_prediction_errors.py W1` | `table5_regressions_W1.csv`、`table5_prediction_errors_W1.csv` | |
 | 頑健性：書類の規則の境界にある4件を加える | `table5_regressions.py R1 --include-boundary-deals` | `table5_regressions_R1_including_boundary_deals.csv` | |
