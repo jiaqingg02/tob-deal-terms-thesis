@@ -1,0 +1,11 @@
+Format change requested by the user: add a short paragraph summary for every item, for later clustering.
+
+For EVERY case and EVERY one of the 7 items, add a new field "paragraph" next to "summary" (keep "summary" as the one-sentence version):
+- Japanese, 2–4 sentences, ≤150 characters, plain form (常体).
+- Fixed order: ① the current state (as of the filing) → ② how it came about / the basis in the text → ③ remaining conditions, risks or open points (write 「残る条件は記載なし」 if none).
+- Same rules as summary: role names only (買付者・対象者・対象者取締役会・特別委員会・大株主（属性）・金融機関・当局 etc.), no proper nouns, no years; key numbers (ratios, counts, days) allowed.
+- If the item is not_written, paragraph is exactly 記載なし.
+- Write only what the excerpt says; no inference beyond it, no outside knowledge.
+
+For the cases you have ALREADY written: add "paragraph" to those JSON files too. Use what you already read; reopen the case's input file only if you need to. Do not change their existing state/summary/quotes unless you find a clear error.
+Then continue the remaining cases with both fields. In your final reply, also confirm that all 20 files have "paragraph" for all 7 items.

@@ -1,0 +1,10 @@
+One more step, to do AFTER you have finished all 20 cases and added "paragraph" everywhere (don't interrupt that work):
+
+The shareholder excerpts were missing the clauses on tender-agreement conditions, cancellation and withdrawal. Corrected inputs are now at pilot20/inputs_v2/<case id>.txt. Only the [shareholder] section changed: it now ends with a block 【応募契約の前提条件・解除・撤回に関する記述】.
+
+For all 20 cases, redo ONLY the "shareholder" item using the [shareholder] section of pilot20/inputs_v2/<case id>.txt. Redo state, flags, summary, paragraph and quotes, with the same rules as TASK.md: rival_exit / other_conditional / firm / cooperative_nontender / opposition / none, priority order, and firm only when the text is explicitly unconditional.
+- Overwrite just that item in pilot20/outputs/<case id>.json. Leave the other 6 items untouched.
+- Add "input_version":"v2" inside the shareholder item.
+- Verify the shareholder quotes against inputs_v2, and the other items' quotes against inputs (v1).
+
+In your final reply, also list for each case the shareholder state before → after.
