@@ -71,13 +71,15 @@
 | 表3.1 分析対象の選定 | `code/02_analysis/table3_1_sample_selection.py` | `table3_1_sample_selection.csv` | |
 | 表3.2 年別の件数 | `code/02_analysis/table3_2_and_3_3_deals_by_year_and_descriptive_statistics.py` | `table3_2_deals_by_year.csv` | |
 | 表3.3 収益率と価格差の記述統計 | 同上 | `table3_3_descriptive_statistics.csv` | |
-| 図3.1 収益率と価格差の分布 | `code/02_analysis/figure3_1_return_and_price_gap_distribution.py` | `figure3_1_return_and_price_gap_distribution.png` | |
+| 図3.1 収益率と価格差の計算に用いる日付と株価 | `code/02_analysis/figure3_1_timeline_of_return_and_price_gap.py` | `figure3_1_timeline_of_return_and_price_gap.png` | 模式図（データを使わない） |
+| 図3.2 収益率と価格差の分布 | `code/02_analysis/figure3_2_return_and_price_gap_distribution.py` | `figure3_2_return_and_price_gap_distribution.png` | |
 | 表3.4 取引条件の定義と件数 | `code/01_dataprep/04_extract_deal_terms.py` | `data/processed/deal_terms.csv` | 定義は `data/codebook.csv` |
-| 図3.2 取引条件の判定の流れ | `code/02_analysis/figure3_2_how_deal_terms_are_judged.py` | `figure3_2_how_deal_terms_are_judged.png` | |
+| 図3.3 取引条件の判定の流れ | `code/02_analysis/figure3_3_how_deal_terms_are_judged.py` | `figure3_3_how_deal_terms_are_judged.png` | |
+| 図3.4 取引条件の分布 | `code/02_analysis/figure3_4_distribution_of_deal_terms.py` | `figure3_4_distribution_of_deal_terms.png` | 件数が表3.4と一致することを確かめてから描く |
 | 付録A 生成AIの判定との照合 | `code/02_analysis/appendix_a_agreement_with_ai.py` | `appendix_a_agreement_with_ai.csv` | 不一致はすべて原文で確認 |
 | 付録A 表A.1 書類から抜き出す箇所 | `code/01_dataprep/00_cut_document_passages.py`、`document_passage_cutting.py` | `data/processed/document_passages/` | |
 | 3.3節 買付価格の照合 | `code/01_dataprep/07_check_offer_prices.py` | `offer_price_check.csv` | |
-| 図4.1 価格差と収益率の関係（全部買付け・部分買付け） | `code/02_analysis/figure4_1_price_gap_and_return.py` | `figure4_1_price_gap_and_return.png` | |
+| 図4.1 価格差の正の部分の取り方と、価格差と収益率の関係 | `code/02_analysis/figure4_1_price_gap_and_return.py` | `figure4_1_price_gap_and_return.png` | (a)は模式図（データを使わない） |
 | 図4.2 収益率の分布と対数変換後の分布 | `code/02_analysis/figure4_2_return_before_and_after_log.py` | `figure4_2_return_before_and_after_log.png` | 歪度も出力する |
 | 4.1節の式 | `code/02_analysis/equation.py` | （なし） | 回帰の式。予測も同じ変数を使う |
 | 第3・4章の本文中の数値 | `code/02_analysis/numbers_in_text.py` | `numbers_in_text.txt` | |
@@ -86,8 +88,10 @@
 | 図5.1 取引条件ごとの係数と90%信頼区間 | `code/02_analysis/figure5_1_deal_term_coefficients.py` | `figure5_1_deal_term_coefficients.png` | 表5.1の (1) と同じ推定 |
 | 図5.2 親子上場の解消と合意の記載なしにおける価格差と収益率の関係 | `code/02_analysis/figure5_2_parent_and_no_agreement_returns.py` | `figure5_2_parent_and_no_agreement_returns.png`、`figure5_2_returns_relative_to_price_gap.csv` | 本文の割合（収益率が価格差から1ポイント以内の割合など）は csv に出力する |
 | 図5.3 全部買付けと部分買付けにおける価格差の正の部分と収益率の関係 | `code/02_analysis/figure5_3_partial_offer_price_gap_and_return.py` | `figure5_3_partial_offer_price_gap_and_return.png` | 傾きと切片を画面に出力する |
-| 予測の方法の選択（数値だけのモデルで6つの方法を比べる。表4.1） | `code/02_analysis/table5_prediction_errors.py R1` | `table5_method_selection_R1.csv` | 平均絶対誤差が最小の方法を使う |
-| 表5.2 三つのモデルの予測誤差と改善幅（403件を会社ごとに10グループに分けて評価。平均絶対誤差と二乗平均平方根誤差、95%ブートストラップ区間と、案件ごとの予測誤差の差の t 検定） | `code/02_analysis/table5_prediction_errors.py R1` | `table5_prediction_errors_R1.csv`、`table5_prediction_errors_R1_by_deal.csv` | |
+| 表4.1 語調の計算に用いる肯定的な語と否定的な語 | `code/02_analysis/table4_1_tone_word_lists.py` | `table4_1_tone_word_lists.csv` | 語の一覧は `03_compute_sentiment_scores.py` から読み込む |
+| 予測の方法の選択（数値だけのモデルで6つの方法を比べる。表4.2） | `code/02_analysis/table5_prediction_errors.py R1` | `table5_method_selection_R1.csv` | 平均絶対誤差が最小の方法を使う |
+| 表5.2 取引条件を加えない式（4.2）の推定結果 | `code/02_analysis/table5_2_equation_without_deal_terms.py` | `table5_2_equation_without_deal_terms.csv` | 表5.1 (2) と同じ推定（取引条件を加えない） |
+| 表5.3 三つのモデルの予測誤差と改善幅（403件を会社ごとに10グループに分けて評価。平均絶対誤差と二乗平均平方根誤差、95%ブートストラップ区間と、案件ごとの予測誤差の差の t 検定） | `code/02_analysis/table5_prediction_errors.py R1` | `table5_prediction_errors_R1.csv`、`table5_prediction_errors_R1_by_deal.csv` | |
 | 図5.4 実際の収益率と予測した収益率（三つのモデル） | `code/02_analysis/figure5_4_actual_and_predicted_returns.py` | `figure5_4_actual_and_predicted_returns.png` | `table5_prediction_errors.py R1` の後に実行する |
 | 図5.5 基本モデルと取引条件モデルの予測した収益率 | `code/02_analysis/figure5_5_basic_and_deal_terms_predictions.py` | `figure5_5_basic_and_deal_terms_predictions.png`、`figure5_5_deals_whose_prediction_changed.csv` | 本文の全部買付け・部分買付け別の絶対誤差の減少は csv に出力する |
 | 図5.6 基本モデルと語調モデルの予測した収益率 | `code/02_analysis/figure5_6_basic_and_tone_predictions.py` | `figure5_6_basic_and_tone_predictions.png`、`figure5_6_tone_prediction_change.csv` | 本文の予測値の変化と絶対誤差が縮んだ案件の数は csv に出力する |
